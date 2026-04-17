@@ -617,9 +617,16 @@ html { scroll-behavior: smooth; }
       <input class="form-input" id="input-phone" type="tel" placeholder="(11) 99999-9999" inputmode="tel" />
     </div>
     <div class="form-field">
-      <label class="form-label">Observações</label>
-      <input class="form-input" id="input-notes" placeholder="Ex: Bebida com gelo, ponto da carne..." />
-    </div>
+  <label class="form-label">Tipo de entrega</label>
+  <select class="form-input form-select" id="input-service-type" onchange="toggleAddressField()">
+    <option value="retirada">🏪 Retirada no local</option>
+    <option value="delivery">🛵 Delivery</option>
+  </select>
+</div>
+<div class="form-field" id="address-field" style="display:none;">
+  <label class="form-label">Endereço de entrega</label>
+  <input class="form-input" id="input-address" placeholder="Rua, número, bairro..." />
+</div>
     <div class="order-summary" id="checkout-summary"></div>
     <button class="confirm-btn" id="confirm-btn" onclick="submitOrder()">Fazer pedido</button>
   </div>
@@ -1097,25 +1104,33 @@ ordemCategorias.forEach(cat => {
       document.getElementById('checkout-modal').classList.remove('open');
     }
 
-  async function submitOrder() {
-  const name  = document.getElementById('input-name').value.trim();
-  const phone = document.getElementById('input-phone').value.trim();
-  const notes = document.getElementById('input-notes').value.trim();
+function toggleAddressField() {
+  const tipo = document.getElementById('input-service-type').value;
+  document.getElementById('address-field').style.display = tipo === 'delivery' ? 'block' : 'none';
+}
+    
+ async function submitOrder() {
+  const name    = document.getElementById('input-name').value.trim();
+  const phone   = document.getElementById('input-phone').value.trim();
+  const tipo    = document.getElementById('input-service-type').value;
+  const address = tipo === 'delivery' ? document.getElementById('input-address').value.trim() : '';
+
   if (!name) { alert('Por favor, informe seu nome.'); document.getElementById('input-name').focus(); return; }
+  if (tipo === 'delivery' && !address) { alert('Por favor, informe o endereço de entrega.'); document.getElementById('input-address').focus(); return; }
 
   const items = Object.values(cart);
   const total = items.reduce((s,c) => s + c.qty * parseFloat(c.item.preco||0), 0);
 
-  // Monta mensagem
   let msg = `Olá! Gostaria de fazer um pedido 😊\n\n`;
   msg += `*Nome:* ${name}\n`;
   if (phone) msg += `*Telefone:* ${phone}\n`;
+  msg += `*Tipo:* ${tipo === 'delivery' ? '🛵 Delivery' : '🏪 Retirada no local'}\n`;
+  if (address) msg += `*Endereço:* ${address}\n`;
   msg += `\n*Itens:*\n`;
   items.forEach(({item, qty}) => {
     msg += `• ${qty}x ${item.nome} — ${formatCurrency(qty * parseFloat(item.preco||0))}\n`;
   });
   msg += `\n*Total: ${formatCurrency(total)}*`;
-  if (notes) msg += `\n\n*Obs:* ${notes}`;
 
   const numero = restaurantPhone ? restaurantPhone.replace(/\D/g, '') : '';
   if (!numero) { alert('Número do WhatsApp não configurado.'); return; }
@@ -1136,7 +1151,9 @@ ordemCategorias.forEach(cat => {
       document.getElementById('success-screen').classList.remove('open');
       document.getElementById('input-name').value = '';
       document.getElementById('input-phone').value = '';
-      document.getElementById('input-notes').value = '';
+      document.getElementById('input-address').value = '';
+document.getElementById('input-service-type').value = 'retirada';
+document.getElementById('address-field').style.display = 'none';
       const toast = document.getElementById('toast-card');
       toast.classList.remove('show');
       updateCartUI();
