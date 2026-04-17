@@ -814,7 +814,7 @@ function showSpotlightCategoria() {
     console.log('🌐 Domínio detectado:', dominio);
     console.log('🔗 API_BASE:', API_BASE);
 
-    const resp = await fetch(`${API_BASE}/api/v1/dominio-cardapio/${dominio}`);
+    const resp = await fetch(`${API_BASE}/api/v1/dominio-delivery/${dominio}`);
     console.log('📡 Status dominio-cardapio:', resp.status);
 
     if (!resp.ok) {
