@@ -642,6 +642,7 @@ html { scroll-behavior: smooth; }
     let cardapioItems = [];
     let cart = {};
     let tutorialDone = false;
+    let restaurantPhone = null;
 
     // ═══════════════════════════════
     // ⏱ SESSÃO 2 HORAS
@@ -837,6 +838,7 @@ async function loadRestaurant() {
       return;
     }
     const cfg = await resp.json();
+restaurantPhone = cfg.telefone || null; // ← adiciona aqui
     console.log('✅ Config recebida:', cfg);
     console.log('🎨 Cores:', cfg.cor_primaria, cfg.cor_secundaria, cfg.cor_fundo, cfg.tema);
 
@@ -1095,48 +1097,32 @@ ordemCategorias.forEach(cat => {
       document.getElementById('checkout-modal').classList.remove('open');
     }
 
-    async function submitOrder() {
-      const name  = document.getElementById('input-name').value.trim();
-      const phone = document.getElementById('input-phone').value.trim();
-      const notes = document.getElementById('input-notes').value.trim();
-      if (!name) { alert('Por favor, informe seu nome.'); document.getElementById('input-name').focus(); return; }
+  async function submitOrder() {
+  const name  = document.getElementById('input-name').value.trim();
+  const phone = document.getElementById('input-phone').value.trim();
+  const notes = document.getElementById('input-notes').value.trim();
+  if (!name) { alert('Por favor, informe seu nome.'); document.getElementById('input-name').focus(); return; }
 
-      const items = Object.values(cart);
-      const total = items.reduce((s,c) => s + c.qty * parseFloat(c.item.preco||0), 0);
-      const itens = items.map(({item,qty}) => ({
-        name: item.nome, qty, quantidade: qty,
-        price: parseFloat(item.preco||0), preco: parseFloat(item.preco||0)
-      }));
+  const items = Object.values(cart);
+  const total = items.reduce((s,c) => s + c.qty * parseFloat(c.item.preco||0), 0);
 
-      const btn = document.getElementById('confirm-btn');
-      btn.disabled = true;
-      btn.textContent = 'Enviando...';
+  // Monta mensagem
+  let msg = `Olá! Gostaria de fazer um pedido 😊\n\n`;
+  msg += `*Nome:* ${name}\n`;
+  if (phone) msg += `*Telefone:* ${phone}\n`;
+  msg += `\n*Itens:*\n`;
+  items.forEach(({item, qty}) => {
+    msg += `• ${qty}x ${item.nome} — ${formatCurrency(qty * parseFloat(item.preco||0))}\n`;
+  });
+  msg += `\n*Total: ${formatCurrency(total)}*`;
+  if (notes) msg += `\n\n*Obs:* ${notes}`;
 
-      try {
-        const resp = await fetch(`${API_BASE}/api/v1/pedidos`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            restaurant_id: restaurantId,
-            client_name: name,
-            client_phone: phone || null,
-            itens, total_price: total,
-            service_type: 'local',
-            origin: 'autoatendimento',
-            table_number: mesaNum || null,
-            notes: notes || null
-          })
-        });
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.error || 'Erro ao criar pedido');
-        closeCheckout();
-        showSuccess(data.order?.order_number);
-      } catch(e) {
-        alert('Erro ao enviar pedido.\n' + e.message);
-        btn.disabled = false;
-        btn.textContent = 'Fazer pedido';
-      }
-    }
+  const numero = restaurantPhone ? restaurantPhone.replace(/\D/g, '') : '';
+  if (!numero) { alert('Número do WhatsApp não configurado.'); return; }
+
+  closeCheckout();
+  window.open(`https://wa.me/55${numero}?text=${encodeURIComponent(msg)}`, '_blank');
+}
     
     function showSuccess(orderNum) {
       document.getElementById('success-order-num').textContent = orderNum ? `Pedido #${orderNum}` : 'Pedido confirmado';
