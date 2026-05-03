@@ -715,11 +715,12 @@ restaurantId = data.restaurant_id;
 await loadCategorias();
 await loadCardapio();
 
-  } catch (e) {
+ } catch (e) {
     console.error('❌ Erro no init:', e);
-    showError('Cardápio não encontrado. Verifique o link.');
+    if (e.message === 'dominio') {
+      showError('Cardápio não encontrado. Verifique o link.');
+    }
   }
-}
 
 async function loadRestaurant() {
   try {
