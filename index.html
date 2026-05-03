@@ -1067,9 +1067,9 @@ async function submitOrder() {
   const items = Object.values(cart);
   const total = items.reduce((s,c) => s + c.qty * parseFloat(c.item.preco||0), 0);
 
-  let msg = `Olá! Gostaria de fazer um pedido 😊\n\n`;
+  let msg = `Olá! Gostaria de fazer um pedido \n\n`;
   msg += `*Nome:* ${name}\n`;
-  msg += `*Tipo:* ${tipo === 'delivery' ? '🛵 Delivery' : '🏪 Retirada no local'}\n`;
+  msg += `*Tipo:* ${tipo === 'delivery' ? ' Delivery' : ' Retirada no local'}\n`;
   if (address) msg += `*Endereço:* ${address}\n`;
   msg += `\n*Itens:*\n`;
   items.forEach(({item, qty}) => {
