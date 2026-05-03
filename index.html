@@ -601,10 +601,6 @@ html { scroll-behavior: smooth; }
     // 🔦 SPOTLIGHT
     // ═══════════════════════════════
     function showSpotlight() {
-  const stored = localStorage.getItem(SESSION_KEY);
-  const agora = Date.now();
-  if (!stored || agora - parseInt(stored) > 30000) return;
-
   setTimeout(() => {
     const searchEl = document.getElementById('search-input');
     if (searchEl) {
