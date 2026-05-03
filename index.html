@@ -708,8 +708,8 @@ function showToast() {
     }
 
     const data = await resp.json();
-    console.log('✅ restaurant_id:', data.restaurant_id);
-    restaurantId = data.restaurant_id;
+    console.log('🔍 data completo:', data);
+restaurantId = data.restaurant_id;
 
     await loadRestaurant();
 await loadCategorias();
